@@ -55,9 +55,6 @@ app.get('/', (req, res) => {
                 <!--   <p>Je <del>memos</del>, donc je suis - <em>René Descartes fans</em></p> -->
                 ${memosDescription}
             </blockquote>
-            <blockquote id="tag-filter" class="filter">
-                <div id="tags"></div>
-            </blockquote>
             <div id="memos" class="memos">
                 <!-- Memos Container -->
             </div>
@@ -67,8 +64,8 @@ app.get('/', (req, res) => {
                 <script>
                     document.write(new Date().getFullYear())
                 </script>
-                <!--    本站样式来自于 <a href="https://www.eallion.com/" target="_blank" rel="noopener noreferrer" class="hidden">Charles
-                    'eallion' Chin</a> <br>-->
+                <a href="https://www.eallion.com/" target="_blank" rel="noopener noreferrer" class="hidden">Charles
+                    'eallion' Chin</a> 
                 www.chaihu.top All Rights Reserved.
             </p>
         </footer>
