@@ -58,7 +58,7 @@ app.get('/', (req, res) => {
             <div id="memos" class="memos">
                 <!-- Memos Container -->
             </div>
-        </section>
+        </section><button id="backToTopBtn" title="Go to top">Top</button>
         <footer class="markdown-body footer">
             <p>Copyright @
                 <script>

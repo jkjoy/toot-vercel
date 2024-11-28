@@ -29,3 +29,25 @@ themeToggle.addEventListener("click", () => {
         );
 });
 // Darkmode End
+// 当页面加载完成后执行
+window.onload = function() {
+    // 获取按钮元素
+    var backToTopBtn = document.getElementById("backToTopBtn");
+
+    // 当用户滚动页面时，显示或隐藏按钮
+    window.onscroll = function() {
+        if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+            backToTopBtn.style.display = "block";
+        } else {
+            backToTopBtn.style.display = "none";
+        }
+    };
+
+    // 当用户点击按钮时，返回页面顶部
+    backToTopBtn.onclick = function() {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    };
+};
