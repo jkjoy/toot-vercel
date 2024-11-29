@@ -142,12 +142,11 @@ async function fetchDataAndUpdate() {
         }
         const data = await response.json();
 
-        // 过滤掉包含回复内容的状态
-        const filteredData = data.filter(status => {
         // 过滤掉转嘟和回复的状态
         const filteredData = data.filter(toot => {
             return !toot.reblog && !toot.in_reply_to_id;
         });
+
         updateHTMl(filteredData);
     } catch (error) {
         console.error('Error fetching data:', error);
