@@ -144,11 +144,10 @@ async function fetchDataAndUpdate() {
 
         // 过滤掉包含回复内容的状态
         const filteredData = data.filter(status => {
-            // 这里可以根据你的需求自定义过滤条件
-            // 例如，排除包含 '@' 或 '回复' 的状态
-            return !status.content.includes('@') && !status.content.includes('回复');
+        // 过滤掉转嘟和回复的状态
+        const filteredData = data.filter(toot => {
+            return !toot.reblog && !toot.in_reply_to_id;
         });
-
         updateHTMl(filteredData);
     } catch (error) {
         console.error('Error fetching data:', error);
