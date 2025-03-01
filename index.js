@@ -66,7 +66,7 @@ app.get('/', (req, res) => {
                 </script>
                 <a href="https://www.eallion.com/" target="_blank" rel="noopener noreferrer" class="hidden">Charles
                     'eallion' Chin</a> 
-                www.chaihu.top All Rights Reserved.
+                www.ima.cm All Rights Reserved.
             </p>
         </footer>
         <!-- Your Memos API -->
