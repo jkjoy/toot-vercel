@@ -114,6 +114,10 @@ function updateHTMl(data) {
         // 解码content
         let decodedContent = decodeHTMLEntities(item.content);
         
+        const applicationInfo = item.application?.name 
+            ? `From「<a href="${item.url}" target="_blank">${item.application.name}</a>」`
+            : `From「<a href="${item.url}" target="_blank">Mastodon</a>」`; // 默认显示
+
         // 移除HTML标签，保留链接内容
         let plainContent = decodedContent.replace(/<[^>]+>/g, (match) => {
             if (match.startsWith('<a href="') && match.includes('</a>')) {
@@ -164,7 +168,7 @@ function updateHTMl(data) {
         </div>
         <p>${processedContent}</p>
         <div class="memos__meta">
-        <small class="memos__date">${relativeTime} • From「<a href="${item.url}" target="_blank">${item.application.name}</a>」</small>
+        <small class="memos__date">${relativeTime} • ${applicationInfo}</small>
         </div> 
         </li>`;
     });
