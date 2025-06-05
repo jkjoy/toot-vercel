@@ -27,7 +27,7 @@ if (!memoDom) {
 }
 
 // 添加加载更多按钮的容器
-memoDom.insertAdjacentHTML('afterend', '<div class="load-more-wrapper" style="text-align: center; margin: 20px 0;"><button id="load-more" style="padding: 10px 20px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; display: none;">加载更多</button></div>');
+memoDom.insertAdjacentHTML('afterend', '<button class="load-btn button-load">努力加载中……</button>');
 const loadMoreBtn = document.getElementById('load-more');
 
 // 辅助函数：解码HTML实体
