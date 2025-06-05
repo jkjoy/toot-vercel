@@ -1,10 +1,13 @@
 // 初始化配置
 const memo = {
-    host: 'https://demo.usememos.com/',
+    host: 'https://jiong.us/',
     limit: '10',
-    userId: '101',
+    userId: '110711427149362311',
     domId: '#memos',
+    nextPage: null, // 存储下一页的URL
 };
+
+// 合并用户配置
 if (typeof memos !== "undefined") {
     for (let key in memos) {
         if (memos[key]) {
@@ -12,6 +15,7 @@ if (typeof memos !== "undefined") {
         }
     }
 }
+
 const limit = memo.limit;
 const memosHost = memo.host.replace(/\/$/, '');
 const memoUrl = `${memosHost}/api/v1/accounts/${memo.userId}/statuses?limit=${limit}&exclude_replies=true&only_public=true`;
@@ -22,93 +26,20 @@ if (!memoDom) {
     console.error(`Element with ID '${memo.domId}' not found.`);
 }
 
-// 插入 HTML
-function updateHTMl(data) {
-    console.log('Data received:', data); // 调试信息
-    let memoResult = "", resultAll = "";
-    // 解析 TAG 标签，添加样式
-    const TAG_REG = /#([^\s#]+?) /g;
-    // 解析 Bilibili
-    const BILIBILI_REG = /<a\shref="https:\/\/www\.bilibili\.com\/video\/((av[\d]{1,10})|(BV([\w]{10})))\/?">.*<\/a>/g;
-    // 解析网易云音乐
-    const NETEASE_MUSIC_REG = /<a\shref="https:\/\/music\.163\.com\/.*id=([0-9]+)".*?>.*<\/a>/g;
-    // 解析 QQ 音乐
-    const QQMUSIC_REG = /<a\shref="https\:\/\/y\.qq\.com\/.*(\/[0-9a-zA-Z]+)(\.html)?".*?>.*?<\/a>/g;
-    // 解析腾讯视频
-    const QQVIDEO_REG = /<a\shref="https:\/\/v\.qq\.com\/.*\/([a-z|A-Z|0-9]+)\.html".*?>.*<\/a>/g;
-    // 解析 Spotify
-    const SPOTIFY_REG = /<a\shref="https:\/\/open\.spotify\.com\/(track|album)\/([\s\S]+)".*?>.*<\/a>/g;
-    // 解析优酷视频
-    const YOUKU_REG = /<a\shref="https:\/\/v\.youku\.com\/.*\/id_([a-z|A-Z|0-9|==]+)\.html".*?>.*<\/a>/g;
-    // 解析 YouTube
-    const YOUTUBE_REG = /<a\shref="https:\/\/www\.youtube\.com\/watch\?v\=([a-z|A-Z|0-9]{11})\".*?>.*<\/a>/g;
+// 添加加载更多按钮的容器
+memoDom.insertAdjacentHTML('afterend', '<div class="load-more-wrapper" style="text-align: center; margin: 20px 0;"><button id="load-more" style="padding: 10px 20px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; display: none;">加载更多</button></div>');
+const loadMoreBtn = document.getElementById('load-more');
 
-    data.forEach((item, i) => {
-        console.log('Processing item:', item); // 调试信息
-        let memoContREG = item.content
-            .replace(TAG_REG, "<span class='tag-span'><a rel='noopener noreferrer' href='#$1'>#$1</a></span>");
-        memoContREG = marked.parse(memoContREG)
-            .replace(BILIBILI_REG, "<div class='video-wrapper'><iframe src='//www.bilibili.com/blackboard/html5mobileplayer.html?bvid=$1&as_wide=1&high_quality=1&danmaku=0' scrolling='no' border='0' frameborder='no' framespacing='0' allowfullscreen='true' style='position:absolute;height:100%;width:100%;'></iframe></div>")
-            .replace(YOUTUBE_REG, "<div class='video-wrapper'><iframe src='https://www.youtube.com/embed/$1' title='YouTube video player' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen title='YouTube Video'></iframe></div>")
-            .replace(NETEASE_MUSIC_REG, "<meting-js auto='https://music.163.com/#/song?id=$1'></meting-js>")
-            .replace(QQMUSIC_REG, "<meting-js auto='https://y.qq.com/n/yqq/song$1.html'></meting-js>")
-            .replace(QQVIDEO_REG, "<div class='video-wrapper'><iframe src='//v.qq.com/iframe/player.html?vid=$1' allowFullScreen='true' frameborder='no'></iframe></div>")
-            .replace(SPOTIFY_REG, "<div class='spotify-wrapper'><iframe style='border-radius:12px' src='https://open.spotify.com/embed/$1/$2?utm_source=generator&theme=0' width='100%' frameBorder='0' allowfullscreen='' allow='autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture' loading='lazy'></iframe></div>")
-            .replace(YOUKU_REG, "<div class='video-wrapper'><iframe src='https://player.youku.com/embed/$1' frameborder=0 'allowfullscreen'></iframe></div>")
-            .replace(YOUTUBE_REG, "<div class='video-wrapper'><iframe src='https://www.youtube.com/embed/$1' title='YouTube video player' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen title='YouTube Video'></iframe></div>");
-
-        // 解析内置资源文件
-        if (item.media_attachments && item.media_attachments.length > 0) {
-            let imgUrl = '';
-            item.media_attachments.forEach(attachment => {
-                if (attachment.type === 'image') {
-                    imgUrl += `<div class="resimg"><img loading="lazy" src="${attachment.preview_url}"/></div>`;
-                }
-            });
-            if (imgUrl) {
-                memoContREG += `<div class="resource-wrapper"><div class="images-wrapper">${imgUrl}</div></div>`;
-            }
-        }
-
-        const relativeTime = getRelativeTime(new Date(item.created_at));
-        memoResult += ` 
-        <li class="timeline" id="${item.id}">
-        <div class="memos__content" style="--avatar-url: url('${item.account.avatar}')"> 
-            <div class="memos__text">
-                <div class="memos__userinfo"><div> 
-            ${item.account.display_name} 
-            </div>
-            <div>
-                <svg viewBox="0 0 24 24" aria-label="认证账号" class="memos__verify">
-                <g>
-                   <path d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.818-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.437 2.25c-.415-.165-.866-.25-1.336-.25-2.11 0-3.818 1.79-3.818 4 0 .494.083.964.237 1.4-1.272.65-2.147 2.018-2.147 3.6 0 1.495.782 2.798 1.942 3.486-.02.17-.032.34-.032.514 0 2.21 1.708 4 3.818 4 .47 0 .92-.086 1.335-.25.62 1.334 1.926 2.25 3.437 2.25 1.512 0 2.818-.916 3.437-2.25.415.163.865.248 1.336.248 2.11 0 3.818-1.79 3.818-4 0-.174-.012-.344-.033-.513 1.158-.687 1.943-1.99 1.943-3.484zm-6.616-3.334l-4.334 6.5c-.145.217-.382.334-.625.334-.143 0-.288-.04-.416-.126l-.115-.094-2.415-2.415c-.293-.293-.293-.768 0-1.06s.768-.294 1.06 0l1.77 1.767 3.825-5.74c.23-.345.696-.436 1.04-.207.346.23.44.696.21 1.04z">
-                   </path>
-                </g>
-                </svg>
-            </div>
-            <div>
-                <div class="memos__id">@<a href=${item.account.url} target=_blank>${item.account.acct}</a></div>
-            </div>
-        </div>
-        <p>${memoContREG}</p>
-        <div class="memos__meta">
-        <small class="memos__date">${relativeTime} • From「<a href="${item.url}" target="_blank">${item.application.name}</a>」</small>
-        </div> 
-        </li>`;
-    });
-
-    const memoBefore = '<ul class="">';
-    const memoAfter = '</ul>';
-    resultAll = memoBefore + memoResult + memoAfter;
-    memoDom.insertAdjacentHTML('beforeend', resultAll);
-
-    // 初始化图片灯箱
-    window.ViewImage && ViewImage.init('.container img');
+// 辅助函数：解码HTML实体
+function decodeHTMLEntities(text) {
+    const textarea = document.createElement('textarea');
+    textarea.innerHTML = text;
+    return textarea.value;
 }
 
 // 相对时间计算
 function getRelativeTime(date) {
-    const rtf = new Intl.RelativeTimeFormat(memos.language, { numeric: "auto", style: 'short' });
+    const rtf = new Intl.RelativeTimeFormat(memos.language || 'zh-CN', { numeric: "auto", style: 'short' });
     const now = new Date();
     const diff = now - date;
     const seconds = Math.floor(diff / 1000);
@@ -133,13 +64,146 @@ function getRelativeTime(date) {
     }
 }
 
+// 插入 HTML
+function updateHTMl(data) {
+    let memoResult = "", resultAll = "";
+    
+    // 正则表达式匹配模式
+    const patterns = {
+        // 解析 Bilibili
+        bilibili: {
+            reg: /https?:\/\/(?:www\.)?bilibili\.com\/video\/(?:av(\d+)|BV([a-zA-Z0-9]+))[\/?]?/i,
+            transform: (match, av, bv) => {
+                const vid = bv || `av${av}`;
+                return `<div class='video-wrapper'><iframe src='//www.bilibili.com/blackboard/html5mobileplayer.html?bvid=${vid}&as_wide=1&high_quality=1&danmaku=0' scrolling='no' border='0' frameborder='no' framespacing='0' allowfullscreen='true' style='position:absolute;height:100%;width:100%;'></iframe></div>`;
+            }
+        },
+        // 解析网易云音乐
+        netease: {
+            reg: /https?:\/\/music\.163\.com\/(?:#\/)?(?:song|playlist|album)\?id=(\d+)/i,
+            transform: (match, id) => `<meting-js auto='https://music.163.com/#/song?id=${id}'></meting-js>`
+        },
+        // 解析 QQ 音乐
+        qqmusic: {
+            reg: /https?:\/\/y\.qq\.com\/(?:[^?]+)\/([^?.]+)(?:\.html)?/i,
+            transform: (match, id) => `<meting-js auto='https://y.qq.com/n/yqq/song${id}.html'></meting-js>`
+        },
+        // 解析腾讯视频
+        qqvideo: {
+            reg: /https?:\/\/v\.qq\.com\/(?:[^?]+)\/([a-z0-9]+)(?:\.html)?/i,
+            transform: (match, id) => `<div class='video-wrapper'><iframe src='//v.qq.com/iframe/player.html?vid=${id}' allowFullScreen='true' frameborder='no'></iframe></div>`
+        },
+        // 解析 Spotify
+        spotify: {
+            reg: /https?:\/\/open\.spotify\.com\/(track|album)\/([a-zA-Z0-9]+)/i,
+            transform: (match, type, id) => `<div class='spotify-wrapper'><iframe style='border-radius:12px' src='https://open.spotify.com/embed/${type}/${id}?utm_source=generator&theme=0' width='100%' frameBorder='0' allowfullscreen='' allow='autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture' loading='lazy'></iframe></div>`
+        },
+        // 解析优酷视频
+        youku: {
+            reg: /https?:\/\/v\.youku\.com\/.*\/id_([a-zA-Z0-9=]+)(?:\.html)?/i,
+            transform: (match, id) => `<div class='video-wrapper'><iframe src='https://player.youku.com/embed/${id}' frameborder=0 'allowfullscreen'></iframe></div>`
+        },
+        // 解析 YouTube
+        youtube: {
+            reg: /https?:\/\/(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/i,
+            transform: (match, id) => `<div class='video-wrapper'><iframe src='https://www.youtube.com/embed/${id}' title='YouTube video player' frameborder='0' allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowfullscreen title='YouTube Video'></iframe></div>`
+        }
+    };
+
+    data.forEach((item, i) => {
+        // 解码content
+        let decodedContent = decodeHTMLEntities(item.content);
+        
+        // 移除HTML标签，保留链接内容
+        let plainContent = decodedContent.replace(/<[^>]+>/g, (match) => {
+            if (match.startsWith('<a href="') && match.includes('</a>')) {
+                const hrefMatch = match.match(/href="([^"]+)"/);
+                return hrefMatch ? hrefMatch[1] : '';
+            }
+            return '';
+        });
+
+        // 应用所有转换模式
+        let processedContent = plainContent;
+        for (const [key, pattern] of Object.entries(patterns)) {
+            processedContent = processedContent.replace(pattern.reg, pattern.transform);
+        }
+
+        // 处理媒体附件
+        if (item.media_attachments && item.media_attachments.length > 0) {
+            let imgUrl = '';
+            item.media_attachments.forEach(attachment => {
+                if (attachment.type === 'image') {
+                    imgUrl += `<div class="resimg"><img loading="lazy" src="${attachment.preview_url}"/></div>`;
+                }
+            });
+            if (imgUrl) {
+                processedContent += `<div class="resource-wrapper"><div class="images-wrapper">${imgUrl}</div></div>`;
+            }
+        }
+
+        const relativeTime = getRelativeTime(new Date(item.created_at));
+        memoResult += ` 
+        <li class="timeline" id="${item.id}">
+        <div class="memos__content" style="--avatar-url: url('${item.account.avatar}')"> 
+            <div class="memos__text">
+                <div class="memos__userinfo"><div> 
+            ${item.account.display_name} 
+            </div>
+            <div>
+                <svg viewBox="0 0 24 24" aria-label="认证账号" class="memos__verify">
+                <g>
+                   <path d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.818-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.437 2.25c-.415-.165-.866-.25-1.336-.25-2.11 0-3.818 1.79-3.818 4 0 .494.083.964.237 1.4-1.272.65-2.147 2.018-2.147 3.6 0 1.495.782 2.798 1.942 3.486-.02.17-.032.34-.032.514 0 2.21 1.708 4 3.818 4 .47 0 .92-.086 1.335-.25.62 1.334 1.926 2.25 3.437 2.25 1.512 0 2.818-.916 3.437-2.25.415.163.865.248 1.336.248 2.11 0 3.818-1.79 3.818-4 0-.174-.012-.344-.033-.513 1.158-.687 1.943-1.99 1.943-3.484zm-6.616-3.334l-4.334 6.5c-.145.217-.382.334-.625.334-.143 0-.288-.04-.416-.126l-.115-.094-2.415-2.415c-.293-.293-.293-.768 0-1.06s.768-.294 1.06 0l1.77 1.767 3.825-5.74c.23-.345.696-.436 1.04-.207.346.23.44.696.21 1.04z">
+                   </path>
+                </g>
+                </svg>
+            </div>
+            <div>
+                <div class="memos__id">@<a href=${item.account.url} target=_blank>${item.account.acct}</a></div>
+            </div>
+        </div>
+        <p>${processedContent}</p>
+        <div class="memos__meta">
+        <small class="memos__date">${relativeTime} • From「<a href="${item.url}" target="_blank">${item.application.name}</a>」</small>
+        </div> 
+        </li>`;
+    });
+
+    const memoBefore = '<ul class="">';
+    const memoAfter = '</ul>';
+    resultAll = memoBefore + memoResult + memoAfter;
+    memoDom.insertAdjacentHTML('beforeend', resultAll);
+
+    // 初始化图片灯箱
+    window.ViewImage && ViewImage.init('.container img');
+}
+
 // 获取数据并更新页面
-async function fetchDataAndUpdate() {
+async function fetchDataAndUpdate(url = memoUrl, isLoadMore = false) {
     try {
-        const response = await fetch(memoUrl);
+        loadMoreBtn.textContent = '加载中...';
+        loadMoreBtn.disabled = true;
+
+        const response = await fetch(url);
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
+
+        // 获取Link header并解析下一页URL
+        const linkHeader = response.headers.get('Link');
+        if (linkHeader) {
+            const links = linkHeader.split(',');
+            const nextLink = links.find(link => link.includes('rel="next"'));
+            if (nextLink) {
+                const matches = nextLink.match(/<(.+?)>/);
+                memo.nextPage = matches ? matches[1] : null;
+            } else {
+                memo.nextPage = null;
+            }
+        } else {
+            memo.nextPage = null;
+        }
+
         const data = await response.json();
 
         // 过滤掉转嘟和回复的状态
@@ -147,10 +211,31 @@ async function fetchDataAndUpdate() {
             return !toot.reblog && !toot.in_reply_to_id;
         });
 
+        // 如果是加载更多，不清空现有内容
+        if (!isLoadMore) {
+            memoDom.innerHTML = '';
+        }
+
         updateHTMl(filteredData);
+
+        // 更新加载更多按钮状态
+        loadMoreBtn.disabled = false;
+        loadMoreBtn.textContent = '加载更多';
+        loadMoreBtn.style.display = memo.nextPage ? 'inline-block' : 'none';
+
     } catch (error) {
         console.error('Error fetching data:', error);
+        loadMoreBtn.textContent = '加载失败，点击重试';
+        loadMoreBtn.disabled = false;
     }
 }
 
+// 添加加载更多按钮的点击事件
+loadMoreBtn.addEventListener('click', () => {
+    if (memo.nextPage) {
+        fetchDataAndUpdate(memo.nextPage, true);
+    }
+});
+
+// 初始加载
 fetchDataAndUpdate();

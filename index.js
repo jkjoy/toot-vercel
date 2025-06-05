@@ -29,22 +29,15 @@ app.get('/', (req, res) => {
         <link href="assets/css/APlayer.min.css" rel="stylesheet" type="text/css">
         <link href="assets/css/highlight.github.min.css" rel="stylesheet" type="text/css">
         <link href="assets/css/custom.css" rel="stylesheet" type="text/css">
-        <title>${memosTittle}</title>
-        <link rel="stylesheet" href="https://cdn.sgcd.net/lxgw-wenkai-screen-webfont/lxgwwenkaigbscreen.css" />
-        <style>
-            body {
-                font-family: "LXGW WenKai Screen", sans-serif;
-            }
-        </style>
+        <title>${memosTittle}</title>              
+        <link rel="stylesheet" href="https://cdn.0tz.top/lxgw-wenkai-screen-webfont/style.css" /> 
+        <style>body{font-family:"LXGW WenKai Screen",sans-serif;}</style>
     </head>
     <body>
         <header>
             <div class="menu">
                 <div class="title">首页</div>
                 <div class="pages">
-                    <!--   <a href="https://github.com/eallion/memos.top" target="_blank" rel="noopener noreferrer" class="">GitHub</a>
-                        <a href="https://eallion.com/memos" target="_blank" rel="noopener noreferrer" class="">I'm Feeling Lucky</a>
-                    -->
                 </div>
             </div>
             <div class='theme-toggle'>🌓</div>
@@ -64,9 +57,7 @@ app.get('/', (req, res) => {
                 <script>
                     document.write(new Date().getFullYear())
                 </script>
-                <a href="https://www.eallion.com/" target="_blank" rel="noopener noreferrer" class="hidden">Charles
-                    'eallion' Chin</a> 
-                www.ima.cm All Rights Reserved.
+                 ${memosTittle}  All Rights Reserved.
             </p>
         </footer>
         <!-- Your Memos API -->
@@ -77,7 +68,6 @@ app.get('/', (req, res) => {
                 userId: '${memosUserId}',
             }
         </script>
-        <script type="text/javascript" src="assets/js/marked.umd.min.js?v=14.0.0"></script>
         <script type="text/javascript" src="assets/js/view-image.min.js"></script>
         <script type="text/javascript" src="assets/js/APlayer.min.js"></script>
         <script type="text/javascript" src="assets/js/Meting.min.js"></script>
