@@ -92,7 +92,7 @@ function updateHTMl(data) {
         </div>
         <p>${memoContREG}</p>
         <div class="memos__meta">
-        <small class="memos__date">${relativeTime} • From「<a href="${item.url}" target="_blank">tooot</a>」</small>
+        <small class="memos__date">${relativeTime} • From「<a href="${item.url}" target="_blank">${item.application.name}</a>」</small>
         </div> 
         </li>`;
     });
