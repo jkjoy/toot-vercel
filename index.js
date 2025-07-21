@@ -82,11 +82,16 @@ app.get('/api/memos', async (req, res) => {
     const url = `${host}/api/v1/accounts/${userId}/statuses?limit=${limit}&exclude_replies=true&only_public=true`;
     try {
         const response = await axios.get(url, {
-            headers: token ? { Authorization: `Bearer ${token}` } : {}
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+            timeout: 5000 // 5秒超时
         });
         res.json(response.data);
     } catch (err) {
-        res.status(500).json({ error: 'API 代理失败', detail: err.message });
+        if (err.code === 'ECONNABORTED') {
+            res.status(504).json({ error: '请求第三方API超时' });
+        } else {
+            res.status(500).json({ error: 'API 代理失败', detail: err.message });
+        }
     }
 });
 
