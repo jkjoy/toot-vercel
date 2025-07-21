@@ -74,14 +74,33 @@ app.get('/', (req, res) => {
 
 // 代理 /api/memos 路由
 app.get('/api/memos', async (req, res) => {
-    const url = `${Host}/api/v1/accounts/${UserId}/statuses?limit=10&exclude_replies=true&only_public=true`;
-    const token = process.env.TOKEN; // 可选
+    // 从环境变量读取
+    const host = process.env.HOST.replace(/\/$/, '');
+    const userId = process.env.USERID;
+    const token = process.env.TOKEN; // 或 GOTOSOCIAL_TOKEN
+
+    // 组装参数
+    const limit = req.query.limit || 10;
+    const params = [
+        `limit=${limit}`,
+        'exclude_replies=true',
+        'only_public=true'
+    ];
+    if (req.query.max_id) params.push(`max_id=${req.query.max_id}`);
+    if (req.query.since_id) params.push(`since_id=${req.query.since_id}`);
+
+    const url = `${host}/api/v1/accounts/${userId}/statuses?${params.join('&')}`;
+
     try {
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
         const response = await axios.get(url, {
             headers,
-            timeout: 5000 // 5秒超时
+            timeout: 5000
         });
+        // 透传 Link header（用于前端获取下一页）
+        if (response.headers.link) {
+            res.set('Link', response.headers.link);
+        }
         res.json(response.data);
     } catch (err) {
         if (err.code === 'ECONNABORTED') {
