@@ -3,13 +3,13 @@ require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const app = express();
+const axios = require('axios');
 
 // 设置环境变量
-const memosHost = process.env.MEMOS_HOST || 'https://jiong.us/';
-const memosLimit = process.env.MEMOS_LIMIT || '20';
-const memosUserId = process.env.MEMOS_USER_ID || '110710864910866001';
-const memosTittle = process.env.MEMOS_TITTLE || 'Retirement Memos';
-const memosDescription = process.env.MEMOS_DESCRIPTION || '愿爱无忧! peace & love !';
+const Host = process.env.HOST || 'https://jiong.us/';
+const UserId = process.env.USERID || '110710864910866001';
+const Tittle = process.env.TITTLE || 'Retirement Memos';
+const Description = process.env.DESCRIPTION || '愿爱无忧! peace & love !';
 
 // 静态文件服务
 app.use(express.static(path.join(__dirname, 'public')));
@@ -29,7 +29,7 @@ app.get('/', (req, res) => {
         <link href="assets/css/APlayer.min.css" rel="stylesheet" type="text/css">
         <link href="assets/css/highlight.github.min.css" rel="stylesheet" type="text/css">
         <link href="assets/css/custom.css" rel="stylesheet" type="text/css">
-        <title>${memosTittle}</title>              
+        <title>${Tittle}</title>              
         <link rel="stylesheet" href="https://cdn.0tz.top/lxgw-wenkai-screen-webfont/style.css" /> 
         <style>body{font-family:"LXGW WenKai Screen",sans-serif;}</style>
     </head>
@@ -43,10 +43,10 @@ app.get('/', (req, res) => {
             <div class='theme-toggle'>🌓</div>
         </header>
         <section id="main" class="container">
-            <h1>${memosTittle}</h1>
+            <h1>${Tittle}</h1>
             <blockquote>
                 <!--   <p>Je <del>memos</del>, donc je suis - <em>René Descartes fans</em></p> -->
-                ${memosDescription}
+                ${Description}
             </blockquote>
             <div id="memos" class="memos">
                 <!-- Memos Container -->
@@ -57,17 +57,9 @@ app.get('/', (req, res) => {
                 <script>
                     document.write(new Date().getFullYear())
                 </script>
-                 ${memosTittle}  All Rights Reserved.
+                 ${Tittle}  All Rights Reserved.
             </p>
         </footer>
-        <!-- Your Memos API -->
-        <script type="text/javascript">
-            var memos = {
-                host: '${memosHost}',
-                limit: '${memosLimit}',
-                userId: '${memosUserId}',
-            }
-        </script>
         <script type="text/javascript" src="assets/js/view-image.min.js"></script>
         <script type="text/javascript" src="assets/js/APlayer.min.js"></script>
         <script type="text/javascript" src="assets/js/Meting.min.js"></script>
@@ -78,6 +70,24 @@ app.get('/', (req, res) => {
     `;
 
     res.send(html);
+});
+
+// 代理 /api/memos 路由
+app.get('/api/memos', async (req, res) => {
+    const limit = req.query.limit || memosLimit;
+    const userId = memosUserId;
+    const host = memosHost.replace(/\/$/, '');
+    const token = process.env.TOKEN; // 可选
+
+    const url = `${host}/api/v1/accounts/${userId}/statuses?limit=${limit}&exclude_replies=true&only_public=true`;
+    try {
+        const response = await axios.get(url, {
+            headers: token ? { Authorization: `Bearer ${token}` } : {}
+        });
+        res.json(response.data);
+    } catch (err) {
+        res.status(500).json({ error: 'API 代理失败', detail: err.message });
+    }
 });
 
 module.exports = app;

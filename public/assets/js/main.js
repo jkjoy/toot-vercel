@@ -1,8 +1,5 @@
 // 初始化配置
 const memo = {
-    host: 'https://jiong.us/',
-    limit: '10',
-    userId: '110711427149362311',
     domId: '#memos',
     nextPage: null, // 存储下一页的URL
 };
@@ -16,16 +13,11 @@ if (typeof memos !== "undefined") {
     }
 }
 
-const limit = memo.limit;
-const memosHost = memo.host.replace(/\/$/, '');
-const memoUrl = `${memosHost}/api/v1/accounts/${memo.userId}/statuses?limit=${limit}&exclude_replies=true&only_public=true`;
-
 // 选择 DOM 元素
 const memoDom = document.querySelector(memo.domId);
 if (!memoDom) {
     console.error(`Element with ID '${memo.domId}' not found.`);
 }
-
 // 添加加载更多按钮的容器
 memoDom.insertAdjacentHTML('afterend', '<button class="load-btn button-load" id="load-more">努力加载中……</button>');
 const loadMoreBtn = document.getElementById('load-more');
@@ -183,7 +175,7 @@ function updateHTMl(data) {
 }
 
 // 获取数据并更新页面
-async function fetchDataAndUpdate(url = memoUrl, isLoadMore = false) {
+async function fetchDataAndUpdate(url = `/api/memos?limit=10`, isLoadMore = false) {
     try {
         loadMoreBtn.textContent = '加载中...';
         loadMoreBtn.disabled = true;
