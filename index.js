@@ -82,7 +82,6 @@ app.get('/api/memos', async (req, res) => {
     // 组装参数
     const limit = req.query.limit || 10;
     const params = [
-        `limit=${limit}`,
         'exclude_replies=true',
         'only_public=true'
     ];
