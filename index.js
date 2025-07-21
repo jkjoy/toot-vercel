@@ -75,9 +75,11 @@ app.get('/', (req, res) => {
 // 代理 /api/memos 路由
 app.get('/api/memos', async (req, res) => {
     const url = `${Host}/api/v1/accounts/${UserId}/statuses?limit=10&exclude_replies=true&only_public=true`;
+    const token = process.env.TOKEN; // 可选
     try {
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
         const response = await axios.get(url, {
-            headers: token ? { Authorization: `Bearer ${token}` } : {},
+            headers,
             timeout: 5000 // 5秒超时
         });
         res.json(response.data);
