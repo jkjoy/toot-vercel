@@ -77,7 +77,7 @@ app.get('/api/memos', async (req, res) => {
     // 从环境变量读取
     const host = process.env.HOST.replace(/\/$/, '');
     const userId = process.env.USERID;
-    const token = process.env.TOKEN; // 或 GOTOSOCIAL_TOKEN
+    const token = process.env.TOKEN; 
 
     // 组装参数
     const limit = req.query.limit || 10;
