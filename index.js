@@ -79,7 +79,7 @@ app.get('/api/memos', async (req, res) => {
     const host = memosHost.replace(/\/$/, '');
     const token = process.env.TOKEN; // 可选
 
-    const url = `${host}/api/v1/accounts/${userId}/statuses?limit=${limit}&exclude_replies=true&only_public=true`;
+    const url = `${host}/api/v1/accounts/${userId}/statuses?limit=10&exclude_replies=true&only_public=true`;
     try {
         const response = await axios.get(url, {
             headers: token ? { Authorization: `Bearer ${token}` } : {},
